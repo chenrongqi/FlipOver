@@ -23,6 +23,9 @@ public class ReboundEffectsView extends FrameLayout {
     private float oldPointY;
     private float viewHeight;
     private boolean isBotton;
+    private boolean goBack;
+    private float limitValue = 0.8f;
+
 
     public ReboundEffectsView(Context context) {
         this(context, null);
@@ -84,22 +87,25 @@ public class ReboundEffectsView extends FrameLayout {
         float nowY = e.getY();
         float diff = (nowY - mVariableY);
         float sc = Math.min(1f, (float) (viewHeight - (nowY - oldPointY)) / (float) viewHeight);
-        if (isBotton && diff > 0) {
+        if ( isBotton && diff > 0) {
             // 已在底部禁止下滑
             return true;
         }
-        if ((nowY - oldPointY) > viewHeight * 0.7) {
+        if ((nowY - oldPointY) > viewHeight * limitValue) {
             // 触发到底部
             resetPrinceView(false);
             return true;
         }
         if (Math.abs(diff) > 0) {// 上下滑动
             // 移动子View的上下位置 ，恢复不用缩放，下滑含缩放，缩放是
-            int interval = sc == 1f ? (int) diff : (int) (diff * sc) / 4;
-            mPrinceView.layout(mPrinceView.getLeft(), mPrinceView.getTop() + interval, mPrinceView.getRight(),
-                    mPrinceView.getBottom() + interval);
-            mPrinceView.setScaleY(sc);
-            mPrinceView.setPivotY(mPrinceView.getBottom() + (int) diff);
+            if (goBack) {
+                mPrinceView.layout(mPrinceView.getLeft(), mPrinceView.getTop() + (int) diff, mPrinceView.getRight(),
+                        mPrinceView.getBottom() + (int) diff);
+                isBotton = false;
+            } else {
+                mPrinceView.setScaleY(sc);
+                mPrinceView.setPivotY(mPrinceView.getBottom());
+            }
             mVariableY = nowY;
             isEndwiseSlide = true;
             return true;// 消费touch事件
@@ -113,15 +119,11 @@ public class ReboundEffectsView extends FrameLayout {
     private void onActionUp(MotionEvent e) {
         float nowY = e.getY();
         float diff = (nowY - mVariableY);
-        if ((nowY - oldPointY) > viewHeight * 0.7) {
+        if ((nowY - oldPointY) > viewHeight * limitValue) {
             // 触发到底部
             resetPrinceView(false);
             return;
-        } else if (isBotton && diff > 0) {
-            // 已在底部禁止下滑
-            return;
-        }
-        if (isEndwiseSlide) {// 是否为纵向滑动事件
+        } else if (isEndwiseSlide) {// 是否为纵向滑动事件
             // 是纵向滑动事件，需要给子View重置位置
             resetPrinceView(true);
             isEndwiseSlide = false;
@@ -141,6 +143,7 @@ public class ReboundEffectsView extends FrameLayout {
             mPrinceView.setScaleY(1);
         } else {
             isBotton = true;
+            goBack = true;
             mPrinceView.layout(mPrinceView.getLeft(),
                     (int) (mInitTop + (viewHeight - 150)),
                     mPrinceView.getRight(),
