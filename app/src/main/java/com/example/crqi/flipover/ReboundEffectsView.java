@@ -87,7 +87,7 @@ public class ReboundEffectsView extends FrameLayout {
         float nowY = e.getY();
         float diff = (nowY - mVariableY);
         float sc = Math.min(1f, (float) (viewHeight - (nowY - oldPointY)) / (float) viewHeight);
-        if ( isBotton && diff > 0) {
+        if (isBotton && diff > 0) {
             // 已在底部禁止下滑
             return true;
         }
@@ -145,9 +145,9 @@ public class ReboundEffectsView extends FrameLayout {
             isBotton = true;
             goBack = true;
             mPrinceView.layout(mPrinceView.getLeft(),
-                    (int) (mInitTop + (viewHeight - 150)),
+                    (int) (mInitTop + (viewHeight*(1 +limitValue) / 2)),
                     mPrinceView.getRight(),
-                    (int) (mInitBottom + (viewHeight - 150)));
+                    (int) (mInitBottom + (viewHeight*(1 +limitValue) / 2)));
             mPrinceView.setScaleY(1);
         }
     }
